@@ -1,5 +1,6 @@
 #include "CSR.h"
 #include "COO.h"
+#include "semiring.h"
 
 #include <stdint.h>
 #include <string>
@@ -179,7 +180,7 @@ void convert(CSR<T>& res, const COO<T>& coo)
 		T v;
 		bool operator < (const Entry& other)
 		{
-			if (r != other.r) 
+			if (r != other.r)
 				return r < other.r;
 			return c < other.c;
 		}
@@ -211,6 +212,7 @@ void convert(CSR<T>& res, const COO<T>& coo)
 	res.row_offsets[coo.rows] = off;
 }
 
+template void CSR<Semiring>::alloc(size_t, size_t, size_t);
 template void CSR<float>::alloc(size_t, size_t, size_t);
 template void CSR<double>::alloc(size_t, size_t, size_t);
 

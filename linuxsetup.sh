@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
-COMPUTE_CAPABILITY="CC70"
+COMPUTE_CAPABILITY="CC86"
 echo "Setup Speck with Compute Capability " $COMPUTE_CAPABILITY
-mkdir build
+mkdir -p build
 cd build/
 cmake -DCUDA_BUILD_$COMPUTE_CAPABILITY=TRUE ..
 make -j

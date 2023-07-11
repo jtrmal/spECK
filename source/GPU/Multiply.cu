@@ -21,6 +21,7 @@
 #include "WorkDistribution.h"
 #include "HashMap.cuh"
 #include "spECKConfig.h"
+#include "semiring.h"
 
 using IndexType = uint32_t;
 
@@ -1127,6 +1128,7 @@ void MultiplyspECK(const dCSR<DataType> &A, const dCSR<DataType> &B, dCSR<DataTy
 	MultiplyspECKImplementation<DataType, BLOCKS_PER_SM, THREADS_PER_BLOCK, MAX_DYNAMIC_SHARED, MAX_STATIC_SHARED>(A, B, matOut, config, timings);
 }
 
+template void MultiplyspECK<Semiring, 4, 1024, spECK_DYNAMIC_MEM_PER_BLOCK, spECK_STATIC_MEM_PER_BLOCK>(const dCSR<Semiring> &A, const dCSR<Semiring> &B, dCSR<Semiring> &matOut, spECKConfig &config, Timings &timings);
 template void MultiplyspECK<float, 4, 1024, spECK_DYNAMIC_MEM_PER_BLOCK, spECK_STATIC_MEM_PER_BLOCK>(const dCSR<float> &A, const dCSR<float> &B, dCSR<float> &matOut, spECKConfig &config, Timings &timings);
 template void MultiplyspECK<double, 4, 1024, spECK_DYNAMIC_MEM_PER_BLOCK, spECK_STATIC_MEM_PER_BLOCK>(const dCSR<double> &A, const dCSR<double> &B, dCSR<double> &matOut, spECKConfig &config, Timings &timings);
 // template void MultiplyspECK<uint64_t, 4, 1024, spECK_DYNAMIC_MEM_PER_BLOCK, spECK_STATIC_MEM_PER_BLOCK>(const dCSR<uint64_t> &A, const dCSR<uint64_t> &B, dCSR<uint64_t> &matOut, spECKConfig &config, Timings &timings);

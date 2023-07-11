@@ -6,6 +6,7 @@
 #include <device_launch_parameters.h>
 #include "GPU/spECKKernels.h"
 #include "Config.h"
+#include "semiring.h"
 
 // saves all entries from the shared memory map to global map in counting kernel
 template <class GlobalMap, class LocalMap>
@@ -33,6 +34,52 @@ __device__ __forceinline__ void saveSMemMapToGlobal(LocalMap *sMemMap, GlobalMap
 			globalMap->atomic_add(sMemMap->idToRow(id), sMemMap->idToCol(id), sMemMap->values[i]);
 		}
 	}
+}
+
+__device__ inline uint64_t as_64bit_val(Semiring x) {
+    return static_cast<uint32_t>(x.weight);
+}
+
+__device__ inline Semiring from_64bit_val(uint64_t x) {
+    int32_t tmp = static_cast<uint32_t>(x);
+    return Semiring(static_cast<float>(tmp));
+}
+
+
+__device__ Semiring atomicAdd(Semiring *a, Semiring b) {
+  unsigned long long int* address_as_ull = (unsigned long long int*) a;
+  unsigned long long int old = as_64bit_val(*a);
+  unsigned long long int assumed;
+  do {
+    assumed = old;
+    uint64_t updated = as_64bit_val(from_64bit_val(assumed).plus(b));
+    old = atomicCAS(address_as_ull, assumed, updated);
+  } while (assumed != old);
+  return from_64bit_val(old);
+}
+
+__device__ Semiring atomicAdd_block(Semiring *a, Semiring b) {
+  unsigned long long int* address_as_ull = (unsigned long long int*) a;
+  unsigned long long int old = as_64bit_val(*a);
+  unsigned long long int assumed;
+  do {
+    assumed = old;
+    uint64_t updated = as_64bit_val(from_64bit_val(assumed).plus(b));
+    old = atomicCAS_block(address_as_ull, assumed, updated);
+  } while (assumed != old);
+  return from_64bit_val(old);
+}
+
+template<typename T,
+         std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
+__device__ __host__ T zero() {
+  return 0;
+}
+
+template<typename T,
+         std::enable_if_t<!std::is_floating_point<T>::value, bool> = true>
+__device__ __host__ T zero() {
+  return T::zero();
 }
 
 // the actual loop of the hash based counting kernel
@@ -1210,7 +1257,7 @@ __device__ __forceinline__ void iterateMatrixDenseNumeric(
 				const INDEX_TYPE rowStart = valid ? rowOffsetsB[colA] : 0;
 				const INDEX_TYPE startIdB = valid ? rowStart + (useRowOffsets ? rowCursor[idA - startId] : 0) : spECK::numeric_limits<INDEX_TYPE>::max();
 				const INDEX_TYPE lastIdBExcl = valid ? (min(startIdB + elementsPerBlock, colA + 1 < rowsB ? rowOffsetsB[colA + 1] : nnzB)) : 0;
-				const VALUE_TYPE valueA = valid ? valuesA[idA] : 0;
+				const VALUE_TYPE valueA = valid ? valuesA[idA] : zero<VALUE_TYPE>();
 				
 				if (threadIdx.x % (1 << SHIFT) == 0 && valid)
 				{

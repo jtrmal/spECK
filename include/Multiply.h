@@ -8,7 +8,7 @@
 // REPLACE THESE VALUES WITH YOUR ACTUAL DEVICE SPECIFICATIONS
 
 static constexpr int spECK_STATIC_MEM_PER_BLOCK {49152};
-static constexpr int spECK_DYNAMIC_MEM_PER_BLOCK{49152};
+static constexpr int spECK_DYNAMIC_MEM_PER_BLOCK{101376};
 
 namespace spECK
 {
