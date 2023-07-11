@@ -28,24 +28,31 @@ INCLUDE_DIRECTORIES(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 # CUDA Flags
 if (CUDA_BUILD_CC50)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_50,code=sm_50")
+  set(CMAKE_CUDA_ARCHITECTURES 50)
 endif ()
 if (CUDA_BUILD_CC52)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_52,code=sm_52")
+  set(CMAKE_CUDA_ARCHITECTURES 52)
 endif ()
 if (CUDA_BUILD_CC61)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_61,code=sm_61")
+  set(CMAKE_CUDA_ARCHITECTURES 61)
 endif ()
 if (CUDA_BUILD_CC70)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_61,code=sm_70")
+  set(CMAKE_CUDA_ARCHITECTURES 70)
 endif ()
 if (CUDA_BUILD_CC75)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_61,code=sm_75")
+  set(CMAKE_CUDA_ARCHITECTURES 75)
 endif ()
 if (CUDA_BUILD_CC80)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_61,code=sm_80")
+  set(CMAKE_CUDA_ARCHITECTURES 80)
 endif ()
 if (CUDA_BUILD_CC86)
 	string(APPEND CMAKE_CUDA_FLAGS " -gencode=arch=compute_61,code=sm_86")
+  set(CMAKE_CUDA_ARCHITECTURES 86)
 endif ()
 
 string(APPEND CMAKE_CUDA_FLAGS "  -Xcompiler -Wall -D_FORCE_INLINES --expt-extended-lambda -use_fast_math --expt-relaxed-constexpr")
@@ -107,7 +114,7 @@ SET(SPECKHEADERS
 )
 
 # spECK Library
-add_library(spECKLib
+add_library(spECKLib SHARED
 				source/GPU/Transpose.cu
 				source/GPU/memory.cpp
 				source/GPU/Compare.cu
@@ -119,6 +126,22 @@ add_library(spECKLib
 				${SPECKHEADERS}
 )
 set_property(TARGET spECKLib PROPERTY CUDA_STANDARD 17)
+
+# spECK Library
+add_library(julia_specklib SHARED
+				source/GPU/Transpose.cu
+				source/GPU/memory.cpp
+				source/GPU/Compare.cu
+				source/COO.cpp
+				source/CSR.cpp
+				source/dCSR.cpp
+				source/Config.cpp
+				source/GPU/Multiply.cu
+        source/julina_interface.cc
+				${SPECKHEADERS}
+)
+set_property(TARGET julia_specklib PROPERTY CUDA_STANDARD 17)
+#target_link_options(julia_specklib PUBLIC "-Wl,--export-symbols-regex=^julia.* ")
 
 # For transposing matrices
 SET(COMP_SOURCES "externals/cusparse/source/cuSparseMultiply.cu")
